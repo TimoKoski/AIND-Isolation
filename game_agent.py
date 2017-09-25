@@ -215,7 +215,72 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        '''
+        Implementation of Minimax-decision as in mini-project
+        '''
+        v = float("-inf")
+        moves = []
+        for m in game.get_legal_moves():
+            v = max(v, self.min_value(game.forecast_move(m)))
+            moves.append((m, v))
+        best_move, best_score = max(moves,key=lambda item:item[1])
+        return best_move
+    
+        #raise NotImplementedError
+
+    '''
+    TK: Helper functions
+    As implemented in mini-project
+    '''
+    def terminal_test(self, game):
+        """ Return True if the game is over for the active player
+        and False otherwise.
+        """
+        # Timeout test
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        return not bool(game.get_legal_moves())  # by Assumption 1
+    
+    
+    def min_value(self, game):
+        """ Return the value for a win (+1) if the game is over,
+        otherwise return the minimum value over all legal child
+        nodes.
+        """
+        
+        # Timeout test
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+                
+        if self.terminal_test(game):
+            return 1  # by Assumption 2
+        v = float("inf")
+        for m in game.get_legal_moves():
+            v = min(v, self.max_value(game.forecast_move(m)))
+        return v
+    
+    
+    def max_value(self, game):
+        """ Return the value for a loss (-1) if the game is over,
+        otherwise return the maximum value over all legal child
+        nodes.
+        """
+        
+        # Timeout test
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        if self.terminal_test(game):
+            return -1  # by assumption 2
+        v = float("-inf")
+        for m in game.get_legal_moves():
+            v = max(v, self.min_value(game.forecast_move(m)))
+        return v
+    
+    '''
+    End of helper functions
+    '''
 
 
 class AlphaBetaPlayer(IsolationPlayer):
