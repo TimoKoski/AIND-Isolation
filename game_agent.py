@@ -229,7 +229,7 @@ class MinimaxPlayer(IsolationPlayer):
         #raise NotImplementedError
 
     '''
-    TK: Helper functions
+    Additional helper functions
     As implemented in mini-project
     '''
     def terminal_test(self, game):
