@@ -164,6 +164,17 @@ class MinimaxPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
+            '''
+            # TK: Adding iterative deepening, idea from Udacity forums
+            # https://discussions.udacity.com/t/alphabeta-functionality-failing/344613
+            
+            depth = 1
+            while True:
+                best_move = self.minimax(game, depth)
+                depth+=1               
+            '''
+            
+            # Original return statement in try block
             return self.minimax(game, self.search_depth)
 
         except SearchTimeout:
@@ -216,21 +227,37 @@ class MinimaxPlayer(IsolationPlayer):
 
         # TODO: finish this function!
         '''
-        Implementation of Minimax-decision as in mini-project
+        Initial implementation of Minimax-decision as in mini-project
+        Additional ideas from discussion forums
+        https://discussions.udacity.com/t/my-test-functionality-of-minimaxplayer-minimax-fails/327579/33
         '''
+        
+        if not game.get_legal_moves():
+            return (-1,-1)
+       
+        #moves = game.get_legal_moves()
+        #best_move = moves[0]
+        best_move = game.get_legal_moves()[0]
+        best_score = float("-inf")
+       
         v = float("-inf")
-        moves = []
+        #moves = []
         for m in game.get_legal_moves():
-            v = max(v, self.min_value(game.forecast_move(m)))
-            moves.append((m, v))
-        best_move, best_score = max(moves,key=lambda item:item[1])
+            v = self.min_value(game.forecast_move(m), depth-1)
+            #v = max(v, self.min_value(game.forecast_move(m)))
+            #moves.append((m, v))
+            if v > best_score:
+                best_score = v
+                best_move = m
+        #best_move, best_score = max(moves,key=lambda item:item[1])
         return best_move
     
         #raise NotImplementedError
 
     '''
-    Additional helper functions
-    As implemented in mini-project
+    Additional helper functions, as implemented in mini-project
+    Additional ideas from discussion forums
+    https://discussions.udacity.com/t/my-test-functionality-of-minimaxplayer-minimax-fails/327579/33
     '''
     def terminal_test(self, game):
         """ Return True if the game is over for the active player
@@ -243,7 +270,7 @@ class MinimaxPlayer(IsolationPlayer):
         return not bool(game.get_legal_moves())  # by Assumption 1
     
     
-    def min_value(self, game):
+    def min_value(self, game, depth):
         """ Return the value for a win (+1) if the game is over,
         otherwise return the minimum value over all legal child
         nodes.
@@ -252,16 +279,21 @@ class MinimaxPlayer(IsolationPlayer):
         # Timeout test
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-                
+
+        # Testing if no legal moves                
         if self.terminal_test(game):
             return 1  # by Assumption 2
+        # Testing if at max depth        
+        if depth == 0:
+            return self.score(game, self)
+        
         v = float("inf")
         for m in game.get_legal_moves():
-            v = min(v, self.max_value(game.forecast_move(m)))
+            v = min(v, self.max_value(game.forecast_move(m), depth-1))
         return v
     
     
-    def max_value(self, game):
+    def max_value(self, game, depth):
         """ Return the value for a loss (-1) if the game is over,
         otherwise return the maximum value over all legal child
         nodes.
@@ -271,11 +303,16 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         
+        # Testing if no legal moves
         if self.terminal_test(game):
-            return -1  # by assumption 2
+            return -1  # by Assumption 2
+        # Testing if at max depth
+        if depth == 0:
+            return self.score(game, self)
+        
         v = float("-inf")
         for m in game.get_legal_moves():
-            v = max(v, self.min_value(game.forecast_move(m)))
+            v = max(v, self.min_value(game.forecast_move(m), depth-1))
         return v
     
     '''
