@@ -164,15 +164,6 @@ class MinimaxPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            '''
-            # TK: Adding iterative deepening, idea from Udacity forums
-            # https://discussions.udacity.com/t/alphabeta-functionality-failing/344613
-            
-            depth = 1
-            while True:
-                best_move = self.minimax(game, depth)
-                depth+=1               
-            '''
             
             # Original return statement in try block
             return self.minimax(game, self.search_depth)
@@ -225,7 +216,6 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
         '''
         Initial implementation of Minimax-decision as in mini-project
         Additional ideas from discussion forums
@@ -235,9 +225,9 @@ class MinimaxPlayer(IsolationPlayer):
         if not game.get_legal_moves():
             return (-1,-1)
        
-        #moves = game.get_legal_moves()
-        #best_move = moves[0]
-        best_move = game.get_legal_moves()[0]
+        moves = game.get_legal_moves()
+        best_move = moves[0]
+        #best_move = game.get_legal_moves()[0]
         best_score = float("-inf")
        
         v = float("-inf")
@@ -357,9 +347,35 @@ class AlphaBetaPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
+        
+        # Timeout test
+        # Note: Timeout test probably unnecessary here
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        best_move = (-1, -1)
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            '''
+            Adding iterative deepening, original idea from 
+            https://github.com/aimacode/aima-pseudocode/blob/master/md/Iterative-Deepening-Search.md
+            Additional ideas from Udacity discussion forums
+            https://discussions.udacity.com/t/alphabeta-functionality-failing/344613         
+            '''
+            
+            depth = 1
+            while True:
+                best_move = self.alphabeta(game, depth)
+                depth+=1               
+            
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
+            
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -405,9 +421,120 @@ class AlphaBetaPlayer(IsolationPlayer):
                 pseudocode) then you must copy the timer check into the top of
                 each helper function or else your agent will timeout during
                 testing.
-        """
+        """    
+       
+        # Timeout test
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        ''' 
+        Initial implementation as in minimax()
+        Additional ideas from Udacity discussion forums
+        https://discussions.udacity.com/t/alphabeta-keeps-failing-test-number-7/387553
+        '''
+        if not game.get_legal_moves():
+            return (-1,-1)
+        
+        if depth == 0:
+            return self.score(game, self)
+        
+        moves = game.get_legal_moves()
+        best_move = moves[0]
+        #best_move = game.get_legal_moves()[0]
+        best_score = float("-inf")
+       
+        # Interface test (test number 5)
+        #return best_move
+       
+        v = float("-inf")
+
+        for m in game.get_legal_moves():
+            v = self.min_value(game.forecast_move(m), depth-1, alpha, beta)
+            
+            if v > best_score:
+                best_score = v
+                best_move = m
+
+            alpha = max(alpha, v) # should comparison include best_score, instead v?
+                
+        return best_move
+      
+    '''
+    Helper functions initially implemented as in MinimaxPlayer above
+    AlphaBeta specifics from 
+    https://github.com/aimacode/aima-pseudocode/blob/master/md/Alpha-Beta-Search.md
+    and additional ideas from Udacity discussion forums
+    https://discussions.udacity.com/t/alphabeta-keeps-failing-test-number-7/387553
+
+    # - Original comments -
+    # Additional helper functions, as implemented in mini-project
+    # Additional ideas from discussion forums
+    # https://discussions.udacity.com/t/my-test-functionality-of-minimaxplayer-minimax-fails/327579/33
+    '''
+    def terminal_test(self, game):
+        """ Return True if the game is over for the active player
+        and False otherwise.
+        """
+        # Timeout test
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        return not bool(game.get_legal_moves())  # by Assumption 1
+    
+    
+    def min_value(self, game, depth, alpha, beta):
+        """ Return the value for a win (+1) if the game is over,
+        otherwise return the minimum value over all legal child
+        nodes.
+        """
+        
+        # Timeout test
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        # Testing if no legal moves                
+        if self.terminal_test(game):
+            return 1  # by Assumption 2
+        # Testing if at max depth        
+        if depth == 0:
+            return self.score(game, self)
+        
+        v = float("inf")
+        for m in game.get_legal_moves():
+            v = min(v, self.max_value(game.forecast_move(m), depth-1, alpha, beta))
+            if v <= alpha:
+                return v
+            beta = min(beta, v)    
+        
+        return v
+    
+    
+    def max_value(self, game, depth, alpha, beta): 
+        """ Return the value for a loss (-1) if the game is over,
+        otherwise return the maximum value over all legal child
+        nodes.
+        """
+        
+        # Timeout test
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        # Testing if no legal moves
+        if self.terminal_test(game):
+            return -1  # by Assumption 2
+        # Testing if at max depth
+        if depth == 0:
+            return self.score(game, self)
+        
+        v = float("-inf")
+        for m in game.get_legal_moves():
+            v = max(v, self.min_value(game.forecast_move(m), depth-1, alpha, beta))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+            
+        return v
+    
+    '''
+    End of helper functions
+    '''
