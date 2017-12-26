@@ -4,8 +4,6 @@ and include the results in your report.
 """
 import random
 
-#test
-
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -37,7 +35,36 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    #raise NotImplementedError
+
+    '''
+    Testing with improved_score from sample_players
+    '''
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    '''
+    Adding book of opening moves
+    '''
+    '''
+    if ((3,3) in game.get_legal_moves(player)):
+        game.apply_move((3,3))
+        return 0
+    '''
+    
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    ox, oy = game.get_player_location(game.get_opponent(player))
+    mx, my = game.get_player_location(player)
+    
+    distance = abs(ox-mx) + abs(oy-my)
+    
+    return float((own_moves - opp_moves) + distance)
 
 
 def custom_score_2(game, player):
@@ -63,12 +90,34 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    #raise NotImplementedError
+
+    '''
+    Combined two approaches from sample_player
+    Giving equal weight to both centricity and substraction of the moves 
+    '''
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    improved_score = float(own_moves - opp_moves)
+    
+    w, h = game.width / 2., game.height / 2.
+    y, x = game.get_player_location(player)
+    center_score = float((h - y)**2 + (w - x)**2)
+
+    return (improved_score + center_score)
 
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
+    
+    # Less aggressive version of improved_score, assigning less weight on limiting opponent moves 
 
     Note: this function should be called from within a Player instance as
     `self.score()` -- you should not need to call this function directly.
@@ -89,7 +138,22 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    #raise NotImplementedError
+
+    '''
+    Testing with improved_score from sample_players
+    Added " * 2 ", to concentrate more on the amount of own moves,
+    as suggested 'greedy' algorithm 'in reverse'
+    '''
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(2 * own_moves - opp_moves)
 
 
 class IsolationPlayer:
