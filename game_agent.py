@@ -34,11 +34,11 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    #raise NotImplementedError
 
     '''
-    Testing with improved_score from sample_players
+    This heuristic combines distance of the players with improved_score from sample_players
+    The point is to give some weight to moves that take the player further away from opponent,
+    and thus providing less opportunities for opponent to restrict players moves with its own. 
     '''
     if game.is_loser(player):
         return float("-inf")
@@ -46,16 +46,7 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    '''
-    Adding book of opening moves
-    '''
-    '''
-    if ((3,3) in game.get_legal_moves(player)):
-        game.apply_move((3,3))
-        return 0
-    '''
     
-
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     
@@ -89,8 +80,6 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    #raise NotImplementedError
 
     '''
     Combined two approaches from sample_player
@@ -117,8 +106,6 @@ def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
     
-    # Less aggressive version of improved_score, assigning less weight on limiting opponent moves 
-
     Note: this function should be called from within a Player instance as
     `self.score()` -- you should not need to call this function directly.
 
@@ -137,12 +124,10 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    #raise NotImplementedError
 
+    # Less aggressive version of improved_score, assigning less weight on limiting opponent moves 
     '''
-    Testing with improved_score from sample_players
-    Added " * 2 ", to concentrate more on the amount of own moves,
+    Added multiplying by two, to concentrate more on the amount of own moves,
     as suggested 'greedy' algorithm 'in reverse'
     '''
     if game.is_loser(player):
